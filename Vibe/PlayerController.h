@@ -57,15 +57,15 @@ public:
 
         // 音视频播放主要接口
         //    加载音频文件
-        void loadFile(QUrl url);
+        Q_INVOKABLE void loadFile(QUrl url);
         //    播放
-        void play();
+        Q_INVOKABLE void play();
         //    暂停
-        void pause();
+        Q_INVOKABLE void pause();
         //    停止
-        void stop();
+        Q_INVOKABLE void stop();
         //    播放暂停
-        void playpause();
+        Q_INVOKABLE void playpause();
 
 protected:
 private:
