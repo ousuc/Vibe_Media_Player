@@ -30,7 +30,8 @@
 |playPause()            |无	    |void	|播放/暂停切换	|player.playPause()                 |
 |setPosition(ms)	      |qint64	|void	|跳转到指定毫秒	|player.setPosition(30000)          |
 |setPositionPercent(pct)|int	  |void	|按百分比跳转	  |player.setPositionPercent(50)      |
-|setVolume(vol)	        |int	  |void	|设置音量	    |player.setVolume(80)               |
+|setVolume(vol)	        |int	  |void	|设置音量	    |player.setVolume(80)                 |  
+---  
 可以根据具体情况进行修改
 
 ## 需要使用的宏
