@@ -13,9 +13,9 @@
 | durationString  | QString | t | f | 总持续时长（mm：ss）  |  undefined    |         
 | currentFileName | QString | t | f | 当前文件名          | mediaLoaded    |
 | isMediaLoaded   | bool    | t | f | 是否已加载文件       | mediaLoaded    |
-| position        | int     | t | f | 当前位置（毫秒）     | positionChanged |
+| position        | int     | t | t | 当前位置（毫秒）     | positionChanged |
 | positionString  | QString | t | f | 当前位置（mm:ss）   | positionChanged |
-| positionPercent | int     | t | f | 进度百分比 0-100    | positionChanged |
+| positionPercent | int     | t | t | 进度百分比 0-100    | positionChanged |
 | volume          | int     | t | t | 音量 0-100         | volumeChanged   |
 > 注意： 其中的 mm:ss 是一个单位，你需要通过duration进行转换
 > 就是将duration的ms 转换为这种  分：秒 的形式
