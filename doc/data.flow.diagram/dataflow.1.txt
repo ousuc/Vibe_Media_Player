@@ -1,0 +1,16 @@
+用户操作 (QML)
+    │
+    ▼
+调用方法 (如 play())
+    │
+    ▼
+C++ 处理 (PlayerController)
+    │
+    ▼
+更新属性 (如 isPlaying)
+    │
+    ▼
+发送信号 (playingChanged)
+    │
+    ▼
+QML 界面更新
