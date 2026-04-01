@@ -28,7 +28,7 @@
 |pause()	              |无	    |void |暂停	        |player.pause()                     |
 |stop()	                |无	    |void	|停止	        |player.stop()                      |
 |playPause()            |无	    |void	|播放/暂停切换	|player.playPause()                 |
-|setPosition(ms)	      |qint64	|void	|跳转到指定毫秒	|player.setPosition(30000)          |
+|setPosition(ms)	      |int  	|void	|跳转到指定毫秒	|player.setPosition(30000)          |
 |setPositionPercent(pct)|int	  |void	|按百分比跳转	  |player.setPositionPercent(50)      |
 |setVolume(vol)	        |int	  |void	|设置音量	    |player.setVolume(80)                 |  
 ---  
