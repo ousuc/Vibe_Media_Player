@@ -1,9 +1,11 @@
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
 
-#include <QObject>
-#include <QtQuick>
-#include <QString>
+
+#include <QtQml>
+class QObject;
+class QString;
+
 // 定义核心类： 音视频播放控制器
 class PlayerController : public QObject{
         Q_OBJECT
@@ -26,7 +28,25 @@ class PlayerController : public QObject{
         Q_PROPERTY(int positionPercent READ positionPercent NOTIFY positionChanged)
         // 音量
         Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
+signals:
+        // 属性信号， 给QML用。
+        void playingChanged();
+        void mediaLoaded();
+        void positionChanged();
+        void volumeChanged();
 public:
+        // 属性读取接口
+        bool isPlaying();
+        int duration();
+        QString durationString();
+        QString currentFileName();
+        bool isMediaLoaded();
+        int position();
+        QString positionString();
+        int positionPercent();
+        int volume();
+        // 属性设置接口
+        void setVolume(int volume);
 protected:
 private:
 };
