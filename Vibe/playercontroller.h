@@ -23,8 +23,8 @@ class PlayerController : public QObject
     Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
 
 public:
-    explicit PlayerController(QObject *parent = nullptr);
 
+    explicit PlayerController(QObject *parent = nullptr);
     // --- 属性的 Getter 方法 ---
     bool isPlaying() const;
     int duration() const;
@@ -45,6 +45,8 @@ public:
     Q_INVOKABLE void setPosition(int ms);
     Q_INVOKABLE void setPositionPercent(int pct);
     Q_INVOKABLE void setVolume(int vol);
+    // 【新增】提供给 QML，用来接收前端的视频画布
+    Q_INVOKABLE void setVideoOutput(QObject *output);
 
 signals:
     // === UML表中定义的更新信号 ===

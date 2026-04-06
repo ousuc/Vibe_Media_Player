@@ -122,6 +122,11 @@ void PlayerController::setVolume(int vol) {
     emit volumeChanged();
 }
 
+void PlayerController::setVideoOutput(QObject *output) {
+    // 直接把前端传进来的 VideoOutput 交给底层的 QMediaPlayer
+    m_player->setVideoOutput(output);
+}
+
 // ==========================================
 // 私有槽函数与辅助工具
 // ==========================================
