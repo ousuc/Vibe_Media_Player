@@ -1,6 +1,10 @@
 #include "playercontroller.h"
 #include <QFileInfo>
-
+#include <QAudioOutput>
+#include <QObject>
+#include <QString>
+#include <QUrl>
+// 构造函数
 PlayerController::PlayerController(QObject *parent)
     : QObject{parent}
     , m_player(new QMediaPlayer(this))
@@ -19,7 +23,7 @@ PlayerController::PlayerController(QObject *parent)
 }
 
 // ==========================================
-// 属性 Getter 实现
+// Q_PROPERTY 读接口
 // ==========================================
 bool PlayerController::isPlaying() const {
     return m_player->playbackState() == QMediaPlayer::PlayingState;
