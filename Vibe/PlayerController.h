@@ -1,76 +1,76 @@
-#ifndef PLAYERCONTROLLER_H
-#define PLAYERCONTROLLER_H
+#pragma once
 
+#include <QObject>
+#include <QQmlEngine>     // 提供 QML_ELEMENT 宏
+#include <QMediaPlayer>   // 核心播放器类
+#include <QAudioOutput>   // 音频输出类
+#include <QUrl>
 
-#include <QtQml>
-class QObject;
-class QString;
-class QUrl;
-// 定义核心类： 音视频播放控制器
-class PlayerController : public QObject{
-        Q_OBJECT
-        QML_ELEMENT
-        // 是否正在播放
-        Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY playingChanged)
-        // 持续时间 ms
-        Q_PROPERTY(int duration READ duration)
-        // 持续时间 字符串 mm:ss
-        Q_PROPERTY(QString durationString READ durationString)
-        // 当前文件名字
-        Q_PROPERTY(QString currentFileName READ currentFileName NOTIFY mediaLoaded)
-        // 媒体文件是否加载
-        Q_PROPERTY(bool isMediaLoaded READ isMediaLoaded NOTIFY mediaLoaded)
-        // 当前位置(时间) ms
-        Q_PROPERTY(int position READ position WRITE setPosition NOTIFY positionChanged)
-        // 位置字符串(时间) mm:ss
-        Q_PROPERTY(QString postionString READ positionString  NOTIFY positionChanged)
-        // 位置百分比
-        Q_PROPERTY(int positionPercent READ positionPercent WRITE setPositionPercent NOTIFY positionChanged)
-        // 音量
-        Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
-signals:
-        // 属性信号， 给QML用。
-        void playingChanged();
-        void mediaLoaded();
-        void positionChanged();
-        void volumeChanged();
+class PlayerController : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT // 使得 QML 前端可以直接引用此类
+
+    // === UML表中定义的属性 (Properties) ===
+    Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY playingChanged)
+    Q_PROPERTY(int duration READ duration NOTIFY durationChanged) // 虽然文档写 undefined，但必须有通知，否则QML无法刷新
+    Q_PROPERTY(QString durationString READ durationString NOTIFY durationChanged)
+    Q_PROPERTY(QString currentFileName READ currentFileName NOTIFY mediaLoaded)
+    Q_PROPERTY(bool isMediaLoaded READ isMediaLoaded NOTIFY mediaLoaded)
+    Q_PROPERTY(int position READ position WRITE setPosition NOTIFY positionChanged)
+    Q_PROPERTY(QString positionString READ positionString NOTIFY positionChanged)
+    Q_PROPERTY(int positionPercent READ positionPercent WRITE setPositionPercent NOTIFY positionChanged)
+    Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
+
 public:
-        // 构造函数
-        PlayerController(QObject *parent);
-        // 属性读取接口
-        bool isPlaying();
-        int duration();
-        QString durationString();
-        QString currentFileName();
-        bool isMediaLoaded();
-        int position();
-        QString positionString();
-        int positionPercent();
-        int volume();
-        // 属性设置接口
-        //    设置音量
-        void setVolume(int volume);
-        //    跳转到指定位置
-        void setPosition(int position);
-        //    设置位置百分比,百分比跳转
-        void setPositionPercent(int positionPercent);
 
-        // 音视频播放主要接口
-        //    加载音频文件
-        Q_INVOKABLE void loadFile(QUrl url);
-        //    播放
-        Q_INVOKABLE void play();
-        //    暂停
-        Q_INVOKABLE void pause();
-        //    停止
-        Q_INVOKABLE void stop();
-        //    播放暂停
-        Q_INVOKABLE void playpause();
+    explicit PlayerController(QObject *parent = nullptr);
+    // --- 属性的 Getter 方法 ---
+    bool isPlaying() const;
+    int duration() const;
+    QString durationString() const;
+    QString currentFileName() const;
+    bool isMediaLoaded() const;
+    int position() const;
+    QString positionString() const;
+    int positionPercent() const;
+    int volume() const;
 
-protected:
+    // === UML表中定义的方法 (Q_INVOKABLE) ===
+    Q_INVOKABLE void loadFile(const QUrl &url);
+    Q_INVOKABLE void play();
+    Q_INVOKABLE void pause();
+    Q_INVOKABLE void stop();
+    Q_INVOKABLE void playPause();
+    Q_INVOKABLE void setPosition(int ms);
+    Q_INVOKABLE void setPositionPercent(int pct);
+    Q_INVOKABLE void setVolume(int vol);
+    // 【新增】提供给 QML，用来接收前端的视频画布
+    Q_INVOKABLE void setVideoOutput(QObject *output);
+
+signals:
+    // === UML表中定义的更新信号 ===
+    void playingChanged();
+    void durationChanged(); // 补充的信号
+    void mediaLoaded();
+    void positionChanged();
+    void volumeChanged();
+
+private slots:
+    // 处理 QMediaPlayer 内部状态改变的槽函数
+    void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
+    void onPositionChanged(qint64 position);
+    void onDurationChanged(qint64 duration);
+
 private:
+    // 内部工具函数：将毫秒转换为 mm:ss 格式
+    QString formatTime(int ms) const;
+
+    // 核心多媒体组件
+    QMediaPlayer *m_player;
+    QAudioOutput *m_audioOutput;
+
+    // 内部状态保存
+    bool m_isMediaLoaded;
+    QString m_currentFileName;
 };
-
-
-
-#endif // PLAYERCONTROLLER_H
