@@ -20,6 +20,8 @@ PlayerController::PlayerController(QObject *parent)
     connect(m_player, &QMediaPlayer::playbackStateChanged, this, &PlayerController::onPlaybackStateChanged);
     connect(m_player, &QMediaPlayer::positionChanged, this, &PlayerController::onPositionChanged);
     connect(m_player, &QMediaPlayer::durationChanged, this, &PlayerController::onDurationChanged);
+    // 这个连接用于监听媒体文件的加载状态
+    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &PlayerController::onMediaStatusChanged);
 }
 
 // ==========================================
@@ -69,19 +71,19 @@ int PlayerController::volume() const {
 // ==========================================
 void PlayerController::loadFile(const QUrl &url) {
     if (url.isEmpty()) return;
+    // 1. 如果当前正在播放就先停掉
+    m_player->stop();
+    // 2. 先把状态标记为“未加载完毕”，防止 UI 误操作
+    m_isMediaLoaded = false;
+    emit mediaLoaded(); // 可选操作，通知前端暂时禁用播放按钮，QML 绑定的文件名和布尔值会自动更新
 
-    m_player->setSource(url);
-
-    // 更新当前文件名
+    // 更新预期的文件名(用于界面提示正在加载xxx)
     m_currentFileName = url.fileName();
     if (m_currentFileName.isEmpty()) {
         m_currentFileName = "未知文件";
     }
-
-    m_isMediaLoaded = true;
-
-    // 发送媒体已加载信号，QML 绑定的文件名和布尔值会自动更新
-    emit mediaLoaded();
+    // 4. 让底层开始异步加载。别在这里设 isMediaLoaded = true！！！
+    m_player->setSource(url);
 }
 
 void PlayerController::play() {
@@ -150,6 +152,31 @@ void PlayerController::onDurationChanged(qint64 duration) {
     // 通知 duration, durationString 改变
     emit durationChanged();
 }
+
+void PlayerController::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    // 根据底层的真实状态来处理业务逻辑
+    switch (status) {
+    case QMediaPlayer::LoadedMedia:
+        // 【这才是真正的加载成功！】
+        // 文件不仅存在且音视频轨都解析完毕，可播放
+        m_isMediaLoaded = true;
+        emit mediaLoaded();
+        break;
+
+    case QMediaPlayer::InvalidMedia:
+        // 文件损坏、格式不支持、或者路径不对
+        m_isMediaLoaded = false;
+        m_currentFileName = "文件格式错误或损坏";
+        emit mediaLoaded(); // 通知 QML 显示错误信息
+        break;
+
+    default:
+        // 比如正在缓冲 (LoadingMedia) 等状态，暂不做处理
+        break;
+    }
+}
+
+
 
 // 将毫秒转换为 mm:ss
 QString PlayerController::formatTime(int ms) const {

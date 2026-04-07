@@ -78,7 +78,8 @@ private slots:
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
     void onPositionChanged(qint64 position);
     void onDurationChanged(qint64 duration);
-
+    // 专门处理媒体加载状态的槽函数
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 private:
     // 内部工具函数：将毫秒转换为 mm:ss 格式
     QString formatTime(int ms) const;
