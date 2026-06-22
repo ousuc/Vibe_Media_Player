@@ -12,34 +12,10 @@ RowLayout {
     // 新增紧凑模式：嵌入底部单行控制栏时使用
     property bool compact: false
 
-    property real savedVolume: 0.7
-    // 组成是：按钮，滑动条，以及一个普通的 Item 用作填充物（注释保留，旧实现已弃用）
+    property real savedVolume: 70
     property var player
 
-    // 开启紧凑模式
     spacing: compact ? 4 : 8
-
-    Button {
-        // 静音按钮
-        id: muteButton
-        Layout.preferredWidth: compact ? 28 : 36
-        Layout.preferredHeight: compact ? 28 : 36
-        ToolTip.visible: hovered
-        //M快捷键逻辑
-        /*ToolTip.text: root.audioOutput.volume > 0 ? "静音 (M)" : "取消静音 (M)"
-        onClicked: {
-            if (root.audioOutput.volume > 0) {
-                root.savedVolume = root.audioOutput.volume
-                root.audioOutput.volume = 0
-            } else {
-                root.audioOutput.volume = root.savedVolume > 0 ? root.savedVolume : 0.7
-            }
-        }*/
-        background: Rectangle {
-            radius: compact ? 14 : 18
-            color: muteButton.down ? "#40FFFFFF" : (muteButton.hovered ? "#25FFFFFF" : "transparent")
-        }
-    }
 
     // 音量滚动slider
     Slider {
@@ -58,9 +34,32 @@ RowLayout {
     }
 
     Button {
-        text: "🔉"
+        id: volumeButton
+        text: {
+            if (player && typeof player.volume !== "undefined")
+                return player.volume > 0 ? "🔉" : "🔇"
+            if (audioOutput)
+                return audioOutput.volume > 0 ? "🔉" : "🔇"
+            return "🔉"
+        }
         background: Rectangle { color: "transparent" }
-        onClicked: if (player) player.volumeDown(5)
+        onClicked: {
+            if (player && typeof player.volume !== "undefined") {
+                if (player.volume > 0) {
+                    root.savedVolume = player.volume
+                    player.volume = 0
+                } else {
+                    player.volume = root.savedVolume > 0 ? root.savedVolume : 70
+                }
+            } else if (audioOutput) {
+                if (audioOutput.volume > 0) {
+                    root.savedVolume = Math.round(audioOutput.volume * 100)
+                    audioOutput.volume = 0
+                } else {
+                    audioOutput.volume = (root.savedVolume > 0 ? root.savedVolume : 70) / 100
+                }
+            }
+        }
     }
 
     // 紧凑模式下隐藏百分比文字，节省横向空间

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 RowLayout {
     property var player
+    property var window
 
     // 播放功能
     Button {
@@ -53,22 +54,13 @@ RowLayout {
     }
 
     Button {
-        text: "■"
-        background: Rectangle { color: "transparent" }
-        onClicked: if (player) player.stop()
-    }
-
-    // 这个是全屏按钮功能，提供 点击事件 需要优化全屏功能
-    Button {
         text: "⛶"
         background: Rectangle { color: "transparent" }
         onClicked: {
-               // 切换全屏 / 退出全屏
-               if (visibility === Window.FullScreen) {
-                   visibility = Window.Windowed;  // 退出全屏
-               } else {
-                   visibility = Window.FullScreen; // 进入全屏
-               }
+            if (window && typeof window.toggleFullscreen === "function")
+                window.toggleFullscreen()
+            else if (window)
+                window.visibility = window.visibility === Window.FullScreen ? Window.Windowed : Window.FullScreen
         }
     }
 }

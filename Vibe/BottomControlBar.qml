@@ -39,6 +39,7 @@ ColumnLayout {
 
     PlaySlider {
         player: parent.player ? parent.player : playerShim
+        window: parent.window
     }
     // 音量控制行  should be extraceted as a document
     VolumeSlider {
