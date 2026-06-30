@@ -1,12 +1,10 @@
-function initial(){
-    // todo
+function initial() {
 }
 
-function open(){
-    // todo
+function open() {
     content.dialogs.fileOpen.open();
 }
 
-function play(){
+function play() {
     content.player.play();
 }

@@ -1,12 +1,7 @@
-
-//该文件汇集了所有的aciton
-import QtQuick.Controls
 import QtQuick
-
+import QtQuick.Controls
 
 Item {
-    id: root
-
     property alias open: _open
     property alias newAction: _new
     property alias quit: _quit
@@ -44,5 +39,4 @@ Item {
                                     : "Vibe Media Player")
         icon.name: "help-about"
     }
-
 }

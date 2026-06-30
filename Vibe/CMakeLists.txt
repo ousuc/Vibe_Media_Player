@@ -10,38 +10,34 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appVibe
     main.cpp
-
 )
 
-# 这个看样子其中的URI就是这个engine的加载名字
-# Uniform Resources Identifier ? 统一资源标识符
-# 定义在什么地方找这个qml文件
 qt_add_qml_module(appVibe
     URI Vibe
     QML_FILES
         Window.qml
+        Content.qml
+        Player.qml
+        Actions.qml
+        Dialogs.qml
+        musicplayer.js
+
         PlaySlider.qml
         VolumeSlider.qml
         TopMenuBar.qml
         BottomControlBar.qml
-        # Controller.qml
-        Actions.qml
-
-        # Content.qml
-        # Dialog.qml
-
         AboutDialog.qml
-
         ActionsLib.qml
-        # Main.qml
+        VibePlayer.qml
+        Controller.qml
+        DisplayArea.qml
+        TopTitleBar.qml
 
     SOURCES
         PlayerController.cpp
         PlayerController.h
-
 )
 
-# 添加资源，用于图片显示
 qt_add_resources(appVibe "static_res"
     PREFIX "/"
     FILES
@@ -49,11 +45,7 @@ qt_add_resources(appVibe "static_res"
         res/icons/logo_lower_res.png
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
 set_target_properties(appVibe PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appVibe
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
@@ -67,7 +59,6 @@ target_link_libraries(appVibe
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
-    Qt6::Quick
 )
 
 include(GNUInstallDirs)
