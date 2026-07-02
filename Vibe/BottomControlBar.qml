@@ -10,10 +10,10 @@ import QtMultimedia
 
 
 
-ColumnLayout {
+RowLayout {
     required property var player
     property var window
-    spacing: 8
+    spacing: 12
 
     PlaySlider {
         player: parent.player

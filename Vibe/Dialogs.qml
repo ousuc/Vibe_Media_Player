@@ -22,6 +22,7 @@ Item {
     }
 
     AboutDialog {
+        implicitWidth: 400
         id: _about
     }
 }

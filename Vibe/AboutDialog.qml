@@ -20,7 +20,6 @@ Dialog {
 
     contentItem: ColumnLayout {
         spacing: 14
-        implicitWidth: 400
 
         RowLayout {
             spacing: 16

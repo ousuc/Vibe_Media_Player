@@ -77,13 +77,17 @@ ApplicationWindow {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: window.isFullscreen ? 0 : 16
+            anchors.leftMargin: window.isFullscreen ? 0 : 8 * 1.5
+            anchors.rightMargin: window.isFullscreen ? 0 : 8 * 1.5
+            anchors.topMargin: window.isFullscreen ? 0 : 10 * 1.5
+            anchors.bottomMargin: window.isFullscreen ? 0 : 10 * 1.5
             spacing: 0
 
             Content {
                 id: content
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                anchors.fill: parent
+                // Layout.fillWidth: true
+                // Layout.fillHeight: true
                 player: playerController
                 window: window
             }
