@@ -1,21 +1,19 @@
 //该文件用于实现核心类： 音视频播放控制器
 #include "PlayerController.h"
+#include "MediaProbeService.h"
 #include <QFileInfo>
 #include <QAudioOutput>
-#include <QProcess>
 #include <QObject>
 #include <QString>
 #include <QUrl>
-#include <QCoreApplication>
-// 构造函数
+// 构造函数。注意这个是关键兼容点：PlayerController 仍然是 QML 注册类型，不能把默认构造能力弄丢。这样既保留 QML 兼容，也保持 AppController 统一管理。
 PlayerController::PlayerController(QObject *parent)
     : QObject{parent}
     , m_player(new QMediaPlayer(this))
     , m_audioOutput(new QAudioOutput(this))
-    , m_probeProcess(new QProcess(this))
+    , m_probeService(nullptr)
     , m_isMediaLoaded(false)
     , m_shouldAutoPlay(false)
-    , m_probeProgram("ffprobe")
 {
     // 将音频输出组件绑定到播放器
     m_player->setAudioOutput(m_audioOutput);
@@ -28,14 +26,23 @@ PlayerController::PlayerController(QObject *parent)
     connect(m_player, &QMediaPlayer::durationChanged, this, &PlayerController::onDurationChanged);
     // 这个连接用于监听媒体文件的加载状态
     connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &PlayerController::onMediaStatusChanged);
-    connect(m_probeProcess,
-            qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
-            this,
-            &PlayerController::onProbeFinished);
-        connect(m_probeProcess,
-            &QProcess::errorOccurred,
-            this,
-            &PlayerController::onProbeErrorOccurred);
+}
+
+void PlayerController::setProbeService(MediaProbeService *probeService) {
+    if (m_probeService == probeService) {
+        return;
+    }
+
+    if (m_probeService) {
+        disconnect(m_probeService, nullptr, this, nullptr);
+    }
+
+    m_probeService = probeService;
+
+    if (m_probeService) {
+        connect(m_probeService, &MediaProbeService::mediaInfoReady, this, &PlayerController::onProbeMediaInfoReady);
+        connect(m_probeService, &MediaProbeService::probeError, this, &PlayerController::onProbeError);
+    }
 }
 
 // ==========================================
@@ -169,43 +176,19 @@ void PlayerController::rewind(int deltaMs) {
 }
 
 void PlayerController::probeFile(const QUrl &url) {
-    if (url.isEmpty()) {
-        m_lastError = "未选择文件";
-        emit errorChanged();
-        return;
-    }
-
-    const QString localPath = url.isLocalFile() ? url.toLocalFile() : url.toString();
-    if (localPath.isEmpty()) {
-        m_lastError = "文件路径无效";
-        emit errorChanged();
-        return;
-    }
-
-    if (m_probeProcess->state() != QProcess::NotRunning) {
-        m_probeProcess->kill();
-        m_probeProcess->waitForFinished(1000);
-    }
-
     m_mediaInfoJson.clear();
     m_lastError.clear();
     emit mediaInfoChanged();
     emit errorChanged();
 
-    const QStringList args = {
-        "-v", "quiet",
-        "-print_format", "json",
-        "-show_format",
-        "-show_streams",
-        localPath
-    };
-    m_probeProcess->start(m_probeProgram, args);
+    if (m_probeService) {
+        m_probeService->probeFile(url);
+    }
 }
 
 void PlayerController::setProbeProgram(const QString &program) {
-    const QString trimmed = program.trimmed();
-    if (!trimmed.isEmpty()) {
-        m_probeProgram = trimmed;
+    if (m_probeService) {
+        m_probeService->setProbeProgram(program);
     }
 }
 
@@ -234,8 +217,18 @@ void PlayerController::setVideoOutput(QObject *output) {
     m_player->setVideoOutput(output);
 }
 
-void PlayerController::openNewWindow() {
-    QProcess::startDetached(QCoreApplication::applicationFilePath());
+void PlayerController::onProbeMediaInfoReady(const QString &json) {
+    m_mediaInfoJson = json;
+    m_lastError.clear();
+    emit mediaInfoChanged();
+    emit errorChanged();
+}
+
+void PlayerController::onProbeError(const QString &message) {
+    m_mediaInfoJson.clear();
+    m_lastError = message;
+    emit mediaInfoChanged();
+    emit errorChanged();
 }
 
 // ==========================================
@@ -287,54 +280,6 @@ void PlayerController::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
         break;
     }
 }
-
-void PlayerController::onProbeFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    const QString stdOut = QString::fromUtf8(m_probeProcess->readAllStandardOutput());
-    const QString stdErr = QString::fromUtf8(m_probeProcess->readAllStandardError());
-
-    if (exitStatus == QProcess::NormalExit && exitCode == 0) {
-        m_mediaInfoJson = stdOut;
-        m_lastError.clear();
-        emit mediaInfoChanged();
-        emit errorChanged();
-        return;
-    }
-
-    m_mediaInfoJson.clear();
-    m_lastError = stdErr.isEmpty() ? "ffprobe 执行失败，请检查是否已安装并加入 PATH" : stdErr.trimmed();
-    emit mediaInfoChanged();
-    emit errorChanged();
-}
-
-void PlayerController::onProbeErrorOccurred(QProcess::ProcessError error) {
-    switch (error) {
-    case QProcess::FailedToStart:
-        m_lastError = "ffprobe 启动失败：请检查 ffprobe 是否存在且已加入 PATH";
-        break;
-    case QProcess::Crashed:
-        m_lastError = "ffprobe 运行过程中崩溃";
-        break;
-    case QProcess::Timedout:
-        m_lastError = "ffprobe 执行超时";
-        break;
-    case QProcess::ReadError:
-        m_lastError = "ffprobe 读取输出失败";
-        break;
-    case QProcess::WriteError:
-        m_lastError = "ffprobe 写入输入失败";
-        break;
-    case QProcess::UnknownError:
-    default:
-        m_lastError = "ffprobe 发生未知错误";
-        break;
-    }
-
-    m_mediaInfoJson.clear();
-    emit mediaInfoChanged();
-    emit errorChanged();
-}
-
-
 
 // 将毫秒转换为 mm:ss
 QString PlayerController::formatTime(int ms) const {

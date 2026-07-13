@@ -20,7 +20,6 @@ Dialog {
 
     contentItem: ColumnLayout {
         spacing: 14
-        implicitWidth: 400
 
         RowLayout {
             spacing: 16
@@ -33,11 +32,30 @@ Dialog {
                 color: "#333333"
                 Layout.alignment: Qt.AlignTop
 
-                Label {
-                    anchors.centerIn: parent
-                    text: "▶"
-                    font.pixelSize: 28
-                    color: "#FFFFFF"
+                // 使用 Canvas绘制，后期可以替换为image
+                Canvas {
+                    anchors.fill: parent
+                    anchors.margins: 8
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        
+                        // 绘制一个圆形背景
+                        ctx.fillStyle = "#FF5722"
+                        ctx.beginPath()
+                        ctx.arc(width / 2, height / 2, Math.min(width, height) / 2, 0, 2 * Math.PI)
+                        ctx.fill()
+                        
+                        // 绘制播放三角形
+                        ctx.fillStyle = "#FFFFFF"
+                        ctx.beginPath()
+                        ctx.moveTo(width * 0.35, height * 0.25)
+                        ctx.lineTo(width * 0.35, height * 0.75)
+                        ctx.lineTo(width * 0.75, height * 0.5)
+                        ctx.closePath()
+                        ctx.fill()
+                    }
                 }
             }
 

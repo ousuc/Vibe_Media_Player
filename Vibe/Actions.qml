@@ -12,7 +12,6 @@ Item {
     property alias quit: _quit
     property alias about: _about
 
-    readonly property bool isWindows: Qt.platform.os === "windows"
     readonly property bool isLinux: Qt.platform.os === "linux"
 
     Action {
@@ -34,7 +33,6 @@ Item {
         text: root.isLinux ? qsTr("退出(&Q)") : qsTr("退出(&X)")
         shortcut: StandardKey.Quit
         icon.name: "application-exit"
-        onTriggered: Qt.quit()
     }
 
     Action {

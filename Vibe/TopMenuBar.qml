@@ -7,14 +7,12 @@ RowLayout {
     id: root
 
     property string currentTitle: ""
-    property Actions actions: null
-
-    // 无 Actions 时的兼容回退（如独立 QML 预览）
-    signal openFileRequested()
-
+    required property Actions actions
+    required property var window
     spacing: 0
 
     MenuBar {
+        visible: !root.window.isFullscreen
         id: menuBar
         Layout.fillWidth: false
         focusPolicy: Qt.NoFocus
@@ -35,27 +33,24 @@ RowLayout {
             title: qsTr("文件(&F)")
 
             MenuItem {
-                action: root.actions ? root.actions.open : null
-                text: root.actions ? action.text : qsTr("打开(&O)...")
-                onTriggered: { if (!root.actions) root.openFileRequested() }
+                action: root.actions.open
             }
 
             MenuItem {
-                action: root.actions ? root.actions.newAction : null
+                action: root.actions.newAction
             }
 
             MenuItem {
-                action: root.actions ? root.actions.quit : null
+                action: root.actions.quit
             }
         }
 
         Menu {
             id: helpMenu
-            visible: root.actions !== null
             title: qsTr("帮助(&H)")
 
             MenuItem {
-                action: root.actions ? root.actions.about : null
+                action: root.actions.about
             }
         }
     }
