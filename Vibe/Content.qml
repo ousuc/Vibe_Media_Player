@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import QtMultimedia
 
 Item {
-    visible: !root.window.isFullscreen
     id: root
     anchors.fill: parent
 
