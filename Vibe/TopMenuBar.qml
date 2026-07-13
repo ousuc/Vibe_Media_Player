@@ -8,10 +8,11 @@ RowLayout {
 
     property string currentTitle: ""
     required property Actions actions
-
+    required property var window
     spacing: 0
 
     MenuBar {
+        visible: !root.window.isFullscreen
         id: menuBar
         Layout.fillWidth: false
         focusPolicy: Qt.NoFocus

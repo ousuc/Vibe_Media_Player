@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtMultimedia
 
 Item {
+    visible: !root.window.isFullscreen
     id: root
     anchors.fill: parent
 
@@ -17,6 +18,7 @@ Item {
     Component.onCompleted: Qt.callLater(function() { videoArea.forceActiveFocus() })
 
     Rectangle {
+
         anchors.fill: parent
         color: "black"
 

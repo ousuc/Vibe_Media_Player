@@ -33,6 +33,7 @@ ApplicationWindow {
     }
 
     header: TopMenuBar {
+        window: window
         actions: actions
         currentTitle: content.fileName
     }

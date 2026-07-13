@@ -5,6 +5,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtMultimedia 5.15
 
+
 Item {
     id: volumeSlider
 
