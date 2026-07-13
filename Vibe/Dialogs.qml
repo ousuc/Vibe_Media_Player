@@ -1,27 +1,28 @@
-import QtCore
-import QtQuick 2.15
-import QtQuick.Dialogs 1.3
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Dialogs
 
 Item {
+    id: root
+
+    signal mediaFileAccepted(var selectedFile)
+
     property alias fileOpen: _fileOpen
     property alias about: _about
 
     FileDialog {
         id: _fileOpen
-        title: "Select some files"
-        currentFolder: StandardPaths.standardLocations
-                        (StandardPaths.DocumentLocation)[0]
-        fileMode: FileDialog.OpenFiles
-        nameFilters: ["Audio File (*.mp3 *.wav *.ogg)"]
+        title: qsTr("打开媒体文件")
+        nameFilters: [
+            qsTr("媒体文件 (*.mp4 *.mkv *.avi *.mov *.wmv *.mp3 *.wav *.flac *.aac *.ogg *.m4a *.wma)"),
+            qsTr("所有文件 (*)")
+        ]
+
+        onAccepted: root.mediaFileAccepted(selectedFile)
     }
 
-    MessageDialog {
+    AboutDialog {
+        implicitWidth: 400
         id: _about
-        modality: Qt.WindowModal
-        buttons: MessageDialog.Ok
-        text: "vibe-player"
-        informativeText: qsTr("vibe-player is a free software")
-        detailedText: "Copyright©2026 Xunfu Zhang Jianhua Lin Yongchao Wu"
     }
 }

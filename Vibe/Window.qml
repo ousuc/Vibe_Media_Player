@@ -1,89 +1,97 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
+
+//// This is the application's main window应用主窗口
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtMultimedia
-import "./" as Local
+
+
 
 ApplicationWindow {
+    id: window
     visible: true
     width: 1000
     height: 800
-    title: "Vibe Media Player"
-    color: "#121212"
-    // 内容：音乐播放器（逻辑核心位置）
-    Local.Content {
-        id: content
-    }
-    // 使用本地 shim（真实逻辑由 C++ 提供）
-    Local.PlayerController {
-        id: playerController
+
+
+    title: Qt.application.name.length > 0 ? Qt.application.name : qsTr("Vibe Media Player")
+    color: "#000000"
+
+    readonly property bool isFullscreen: visibility === Window.FullScreen
+
+    function toggleFullscreen() {
+        visibility = isFullscreen ? Window.Windowed : Window.FullScreen
     }
 
-    FileDialog {
-        id: openMediaDialog
-        title: "选择一个媒体文件"
-        nameFilters: ["媒体文件 (*.mp4 *.mkv *.avi *.mov *.wmv *.mp3 *.wav *.flac)", "所有文件 (*)"]
-        onAccepted: {
-            playerController.probeFile(selectedFile)
-            playerController.loadFile(selectedFile)
-            playerController.play()
-        }
+    Actions {
+        id: actions
     }
 
-    // 播放器主体背景
+    Dialogs {
+        id: dialogs
+    }
+
+    header: TopMenuBar {
+        window: window
+        actions: actions
+        currentTitle: content.fileName
+    }
+
+    Connections {
+        target: actions.open
+        function onTriggered() { dialogs.fileOpen.open() }
+    }
+
+    Connections {
+        target: actions.newAction
+        function onTriggered() { appController.openNewWindow() }
+    }
+
+    Connections {
+        target: actions.quit
+        function onTriggered() { appController.quitApplication() }
+    }
+
+    Connections {
+        target: actions.about
+        function onTriggered() { dialogs.about.open() }
+    }
+
+    Shortcut {
+        sequence: "Escape"
+        enabled: window.isFullscreen
+        onActivated: window.visibility = Window.Windowed
+    }
+
+    Connections {
+        target: dialogs
+        function onMediaFileAccepted(selectedFile) { appController.openMediaFile(selectedFile) }
+    }
+
     Rectangle {
         anchors.fill: parent
-        anchors.margins: 0
+
         color: "#000000"
-        border.color: "#ffffff"
-        border.width: 1
-        // 整体布局
+        border.color: window.isFullscreen ? "transparent" : "#ffffff"
+        border.width: window.isFullscreen ? 0 : 1
+
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 16
+            anchors.leftMargin: window.isFullscreen ? 0 : 8 * 1.5
+            anchors.rightMargin: window.isFullscreen ? 0 : 8 * 1.5
+            anchors.topMargin: window.isFullscreen ? 0 : 10 * 1.5
+            anchors.bottomMargin: window.isFullscreen ? 0 : 10 * 1.5
             spacing: 0
 
-
-            TopTitleBar {
-                Layout.preferredHeight: 30
-                Layout.fillWidth: true
-                currentTitle: playerController.currentFileName === "" ? "视频播放" : playerController.currentFileName
-                onOpenFileRequested: openMediaDialog.open()
-                onNewWindowRequested: playerController.openNewWindow()
-            }
-            // 视频显示区域
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: "#645757"
-                border.color: "#ffffff"
-                border.width: 1
-
-                VideoOutput {
-                    id: videoOutput
-                    anchors.fill: parent
-                    fillMode: VideoOutput.PreserveAspectFit
-                }
-
-                Component.onCompleted: playerController.setVideoOutput(videoOutput)
-            }
-
-            BottomControlBar {
-                Layout.fillWidth: true
-                spacing: 20
+            Content {
+                id: content
+                anchors.fill: parent
+                // Layout.fillWidth: true
+                // Layout.fillHeight: true
                 player: playerController
+                window: window
             }
-
-            Label {
-                Layout.fillWidth: true
-                color: "#d0d0d0"
-                elide: Label.ElideRight
-                text: playerController.lastError === ""
-                      ? (playerController.mediaInfoJson === "" ? "FFmpeg 解析结果：等待文件..." : "FFmpeg 解析结果已更新（JSON 长度: " + playerController.mediaInfoJson.length + "）")
-                      : ("FFmpeg 解析失败: " + playerController.lastError)
-            }
-
 
         }
     }
